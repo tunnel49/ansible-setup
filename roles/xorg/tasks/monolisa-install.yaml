@@ -11,7 +11,7 @@
       state: 'directory'
   - name: download monolisa font
     ansible.builtin.import_role:
-      name: github-release
+      name: tunnel49.util.github_release
     vars:
       token: '{{ github_token }}'
       repo: 'tunnel49/monolisa'

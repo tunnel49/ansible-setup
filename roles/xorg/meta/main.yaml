@@ -5,3 +5,6 @@ galaxy_info:
   license: Creative Commons Zero v1.0 Universal
   min_ansible_version: 2.1
   galaxy_tags: []
+
+  collections:
+  - tunnel49.util

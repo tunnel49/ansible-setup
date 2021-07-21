@@ -1,8 +1,0 @@
----
-
-dependencies: []
-
-collections:
-- name: https://github.com/tunnel49/tunnel49.util.git
-  type: git
-  version: devel

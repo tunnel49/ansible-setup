@@ -6,5 +6,4 @@
 - import_tasks: awesome-wm-install.yaml
 - import_tasks: monolisa-install.yaml
 - import_tasks: application-install.yaml
-
 - import_tasks: x11-start.yaml
