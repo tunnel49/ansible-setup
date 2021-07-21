@@ -1,0 +1,21 @@
+---
+
+- name: "run baseline"
+  import_playbook: baseline.yaml
+
+- name: "update the node with the latest configuration"
+  hosts: all
+  vars:
+    host_files: "{{ playbook_dir }}/files/{{ inventory_hostname }}"
+  gather_facts: true
+
+  tasks:
+    - name: "import host roles"
+      include_role:
+        name: "{{ role }}"
+        apply:
+          tags: "{{ role }}"
+      tags: always
+      loop: "{{ extra_roles }}"
+      loop_control:
+        loop_var: "role"

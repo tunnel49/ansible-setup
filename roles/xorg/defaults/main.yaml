@@ -1,0 +1,11 @@
+x11_restart_on_reconfiguration: false
+
+font_preferences: []
+
+monolisa:
+  installed_version: "0.0.0-0"
+  repo: MonoLisa
+  asset: MonoLisa-otf.tgz
+  dir: /usr/local/share/fonts/otf/MonoLisa
+
+  

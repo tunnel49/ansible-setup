@@ -1,0 +1,46 @@
+---
+- name: "Run baseline tasks to prepare for further runs"
+  hosts: all
+  become: false
+  gather_facts: false
+
+  tasks:
+  - name: get ansible user data 
+    check_mode: false
+    changed_when: false
+    become: false
+    ansible.builtin.command: id -Gn
+    register: user_meta
+  
+  - name: check that the user can sudo
+    become: false
+    vars:
+      sudo_groups:
+      - wheel
+      - sudoers
+    ansible.builtin.set_fact: 
+      ansible_sudo: >-
+        {{ user_meta.stdout | split( ' ' ) | intersect( sudo_groups ) }}
+      cacheable: true
+
+  - name: fail if ansible can't sudo
+    become: false
+    fail:
+      msg: |
+        Ansible probably can't sudo
+        if you are sure you want to try anyway, set force_sudo to true
+    when: not (ansible_sudo or (force_sudo | bool))
+
+  - name: update pacman packages
+    become: true
+    community.general.pacman:
+      update_cache: true
+      upgrade: true
+
+  - name: install packages required for ansible operation
+    become: true
+    community.general.pacman:
+      name:
+      - python
+      - python-pip
+      state: latest

@@ -1,0 +1,19 @@
+---
+
+- name: install monolisa font
+  become: true
+  vars:
+    path: '/usr/local/share/fonts/otf/MonoLisa'
+  block:
+  - name: create monolisa font folder
+    ansible.builtin.file:
+      path: '{{ path }}'
+      state: 'directory'
+  - name: download monolisa font
+    ansible.builtin.import_role:
+      name: github-release
+    vars:
+      token: '{{ github_token }}'
+      repo: 'tunnel49/monolisa'
+      asset: 'MonoLisa-otf.tgz'
+      dest: '{{ path }}'

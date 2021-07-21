@@ -1,0 +1,4 @@
+---
+
+- name: 'reconfigure x11'
+  ansible.builtin.import_tasks: x11-reconfigure-handler.yaml

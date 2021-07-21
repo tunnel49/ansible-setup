@@ -1,0 +1,11 @@
+---
+
+- name: run accumulated handlers
+  meta: flush_handlers
+
+- name: enable xorg x11 services
+  become: true
+  ansible.builtin.systemd:
+    name: xdm.service
+    state: started
+    enabled: true

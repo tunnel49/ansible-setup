@@ -1,0 +1,8 @@
+---
+- name: install font configuration
+  become: true
+  ansible.builtin.template:
+    src: 'fonts/{{ item }}.j2'
+    dest: '/etc/fonts/{{ item }}'
+  loop:
+  - 'conf.d/20-local-preferences.conf'

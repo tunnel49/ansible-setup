@@ -1,0 +1,14 @@
+---
+
+- name: install awesome window manager
+  become: true
+  community.general.pacman:
+    name:
+    - awesome
+    state: latest
+
+- name: install system awesome config
+  become: true
+  ansible.builtin.copy:
+    src: awesome/rc.lua
+    dest: /etc/xdg/awesome/rc.lua

@@ -1,0 +1,8 @@
+---
+
+- name: restart xdm service
+  when: x11_restart_on_reconfiguration
+  become: true
+  ansible.builtin.systemd:
+    name: xdm.service
+    state: restarted

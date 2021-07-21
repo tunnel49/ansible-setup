@@ -1,0 +1,32 @@
+- name: install xorg x11 window system
+  become: true
+  community.general.pacman: 
+    name: 
+    - xorg-server
+    - xorg-xinit
+    - xorg-xrandr
+    - xorg-xdm
+    - xorg-xlsfonts
+    state: latest
+    update_cache: yes
+  notify: 'reconfigure x11'
+
+- name: install system x11 configuration
+  become: true
+  ansible.builtin.template:
+    src: "X11/{{ item.0 }}"
+    dest: "/etc/X11/{{ item.1 }}"
+  loop:
+  - [xinitrc.j2,    xinit/xinitrc]
+  - [Xresources.j2, xdm/Xresources]
+  - [Xsession.j2,   xdm/Xsession]
+  notify: 'reconfigure x11'
+
+- name: copy host specific xorg.conf.d
+  become: true
+  ansible.builtin.copy:
+    src: '{{ item }}'
+    dest: '/etc/X11/xorg.conf.d/{{ item | basename }}'
+  loop: >-
+    {{ query('fileglob','{{ host_files }}/etc/X11/xorg.conf.d/*') }}
+  notify: 'reconfigure x11'

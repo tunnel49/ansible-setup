@@ -1,0 +1,18 @@
+---
+
+- name: install xfce
+  become: true
+  community.general.pacman: 
+    name: xfce4
+    state: latest
+    update_cache: yes
+  notify: 'reconfigure x11'
+
+- name: install system xfce config
+  become: true
+  ansible.builtin.template:
+    src: 'xfce4/{{ item }}'
+    dest: '/etc/xdg/xfce4/{{ item }}'
+  loop:
+  - 'xfconf/xfce-perchannel-xml/xfce4-session.xml.j2'
+  notify: 'reconfigure x11'
