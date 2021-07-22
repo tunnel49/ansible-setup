@@ -24,9 +24,12 @@
 
 - name: copy host specific xorg.conf.d
   become: true
+  vars:
+    _glob: >-
+      {{ xorg_conf_d_files}}/*
   ansible.builtin.copy:
     src: '{{ item }}'
     dest: '/etc/X11/xorg.conf.d/{{ item | basename }}'
   loop: >-
-    {{ query('fileglob','{{ host_files }}/etc/X11/xorg.conf.d/*') }}
+    {{ query('fileglob', _glob }}
   notify: 'reconfigure x11'

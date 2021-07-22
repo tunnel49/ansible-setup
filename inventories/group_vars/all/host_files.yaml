@@ -1,0 +1,3 @@
+---
+
+host_files: "{{ inventory_dir }}/host_files/{{ inventory_hostname }}"

@@ -10,6 +10,15 @@
   gather_facts: true
 
   tasks:
+    - name: "import xorg"
+      import_role:
+        name: xorg
+      vars:
+        xorg_conf_d_files: >-
+          "{{ host_files }}/etc/X11/xorg.conf.d/"
+      tags: xorg
+  
+
     - name: "import host roles"
       include_role:
         name: "{{ role }}"
