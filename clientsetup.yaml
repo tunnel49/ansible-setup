@@ -3,15 +3,18 @@
 - name: "run baseline"
   import_playbook: baseline.yaml
 
+
 - name: "update the node with the latest configuration"
   hosts: all
-  vars:
-    host_files: "{{ playbook_dir }}/files/{{ inventory_hostname }}"
   gather_facts: true
-
   tasks:
+    - name: "import linux_system"
+      include_role:
+        name: linux_system
+      tags: system
+
     - name: "import xorg"
-      import_role:
+      include_role:
         name: xorg
       vars:
         xorg_conf_d_files: >-

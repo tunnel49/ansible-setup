@@ -31,5 +31,5 @@
     src: '{{ item }}'
     dest: '/etc/X11/xorg.conf.d/{{ item | basename }}'
   loop: >-
-    {{ query('fileglob', _glob }}
+    {{ query('fileglob', _glob) }}
   notify: 'reconfigure x11'

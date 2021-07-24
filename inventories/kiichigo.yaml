@@ -2,8 +2,7 @@
 clients:
   hosts:
     kiichigo.tunnel49.net:
-      extra_roles:
-      - xorg
+      extra_roles: []
 
 laptop:
   hosts:
