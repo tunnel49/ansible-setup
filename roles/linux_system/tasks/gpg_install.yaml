@@ -1,0 +1,14 @@
+---
+
+# Read https://dev.gnupg.org/source/gnupg/browse/master/doc/examples/systemd-user/
+- name: enable gpg-agent globally
+  become: true
+  ansible.builtin.systemd:
+    name: '{{ item }}'
+    enabled: true
+    scope: global
+  loop:
+  - dirmngr.socket
+  - gpg-agent.socket
+  - gpg-agent-ssh.socket
+  - gpg-agent-browser.socket

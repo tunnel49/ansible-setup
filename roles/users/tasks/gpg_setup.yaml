@@ -1,0 +1,18 @@
+- loop: '{{ trusted_keys | dict2items }}'
+  block:
+  - command: 
+      cmd: gpg -k {{ item.key }}
+    register: _result 
+    failed_when: not _result.rc in [0,2]
+
+  - name: import key
+    when: _result.rc == 2
+    shell: 
+      cmd: >-
+        gpg --receive-keys {{ item.key }} &&
+        gpg --import-ownertrust <<< "{{ item.key }}:{{ item.trust }}:"
+
+  - name: generate keys
+    shell:
+      cmd: >-
+        gpg 

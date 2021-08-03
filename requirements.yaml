@@ -7,3 +7,8 @@ collections:
   source: https://github.com/tunnel49/tunnel49.util.git
   type: git
   version: 0.1.0
+- name: community.general
+  source: https://galaxy.ansible.com
+- name: ansible.posix
+  source: https://galaxy.ansible.com
+

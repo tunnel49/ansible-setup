@@ -1,10 +1,47 @@
 ---
+- name: install required packages
+  become: true
+  community.general.pacman: 
+    name: 
+    - rsync
+    state: latest
+
+- name: copy skeleton
+  become: true
+  ansible.builtin.unarchive:
+    src: skel.tar
+    dest: /etc/
+    owner: 0
+    group: 0
+    
+    # - name: copy skeleton
+    #   become: true
+    #   ansible.posix.synchronize:
+    #     src: skel/
+    #     dest: /etc/skel/
+    #     delete: true
+    #     checksum: true
+    #     rsync_opts:
+      #     - "--no-motd"
+      #     - "--exclude=.gitkeep"
+
+- name: create wheel folder
+  become: true
+  ansible.builtin.file:
+    path: /srv/groups/wheel
+    state: directory
+    mode: 02770
+    group: wheel
 
 - name: install sshd_config
   become: true
   ansible.builtin.template:
     src: 'ssh/sshd_config.j2'
     dest: '/etc/ssh/sshd_config'
-  notify: reconfigure_sshd
+  notify: reconfigure sshd
+
+- name: install gpg2
+  import_tasks: gpg_install.yaml
 
 - meta: flush_handlers
+

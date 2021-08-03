@@ -1,4 +1,4 @@
 ---
 
-- name: reconfigure_sshd
-  ansible.builtin.include_tasks: 'sshd-reconfigure-handler.yaml'
+- name: reconfigure sshd
+  ansible.builtin.include_tasks: 'sshd_reconfigure_handler.yaml'

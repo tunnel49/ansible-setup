@@ -1,0 +1,14 @@
+---
+
+- name: "run bootstrap"
+  import_playbook: bootstrap.yaml
+  tags:
+  - never
+  - bootstrap
+
+- name: "run baseline"
+  import_playbook: baseline.yaml
+  tags: always
+
+- name: "run setup"
+  import_playbook: setup.yaml

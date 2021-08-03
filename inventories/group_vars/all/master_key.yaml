@@ -1,0 +1,5 @@
+---
+
+master_key_id: 'B9B4F3562BBDA532D2402667419827F181500FE8'
+master_key_algo: '22'
+master_key_revoker: '{{ master_key_algo }}:{{ master_key_id }}'

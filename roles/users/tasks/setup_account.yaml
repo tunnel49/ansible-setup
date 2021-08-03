@@ -1,0 +1,26 @@
+---
+
+- name: check if user exists
+  ansible.builtin.command:
+    cmd: >-
+      getent passwd {{ user | quote }}
+  register: _entity
+  failed_when: not _entity.rc in [0,2]
+  changed_when: false
+
+- name: create new account
+  when: _entity.rc == 2
+  include_tasks: new_account.yaml
+
+- name: update user settings
+  become: true
+  ansible.builtin.user:
+    name: >-
+      {{ user }}
+    shell: >-
+      {{ idm_data[user].shell | d( default_shell ) }}
+    groups: >-
+      {{ idm_data[user].groups | d( '' ) }}
+    password_lock: >-
+      {{ idm_data[user].password_lock | d( omit ) }}
+

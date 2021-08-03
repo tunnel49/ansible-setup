@@ -1,0 +1,22 @@
+---
+
+default_shell: /bin/bash
+
+wheel_groups:
+- wheel
+- video
+- storage
+- optical
+- audio
+
+idm_data:
+  tunnel49:
+    uid:  10000
+    groups: '{{wheel_groups}}'
+  billogram:
+    uid:  10001
+    groups: '{{wheel_groups}}'
+
+trusted_keys:
+  B9B4F3562BBDA532D2402667419827F181500FE8:
+    trust: 6
