@@ -1,0 +1,36 @@
+---
+
+- name: "setup accounts"
+  include_tasks: setup_account.yaml
+  loop: >-
+    {{ users }}
+  loop_control:
+    loop_var: user
+
+      #- name: "setup gpg"
+      #  import_task: gpg_setup
+      #  vars:
+      #    _users: #TODO
+
+  # base setup
+  # import known public keys (public git repo?)
+  # read this BUT dont use https://dev.gnupg.org/T3347
+  # USE THE BELOW
+  # https://dev.gnupg.org/source/gnupg/browse/master/doc/examples/systemd-user/
+  # SSH_AUTH_SOCK probably goes in /etc/profile.d
+
+      # - name: "setup ssh" 
+  # setup ssh to accept gpg keys
+  # import the correct public keys into authorized_keys
+  # https://opensource.com/article/19/4/gpg-subkeys-ssh
+  #
+  
+      # - name: "gpg private keys"
+  # generate private keys
+  # write passphrases to vault
+  # return new public keys to the executor and import into gpg
+  #
+  # THIS IS A SEPARATE BASH SCRIPT RUN ON THE HOST
+  # sign the keys on the executor 
+  # reimport them on the target
+

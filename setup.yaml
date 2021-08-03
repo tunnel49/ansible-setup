@@ -1,28 +1,28 @@
 ---
 
-- name: "run baseline"
-  import_playbook: baseline.yaml
-
-
-- name: "update the node with the latest configuration"
+- name: "setup client with current configuration"
   hosts: all
   gather_facts: true
   tasks:
-    - name: "import linux_system"
-      include_role:
+    - name: "setup linux_system"
+      import_role:
         name: linux_system
       tags: system
 
-    - name: "import xorg"
-      include_role:
+    - name: "setup xorg"
+      import_role:
         name: xorg
       vars:
         xorg_conf_d_files: >-
           "{{ host_files }}/etc/X11/xorg.conf.d/"
       tags: xorg
+    
+    - name: "create users"
+      import_role:
+        name: users
+      tags: users
   
-
-    - name: "import host roles"
+    - name: "include host roles"
       include_role:
         name: "{{ role }}"
         apply:
@@ -31,3 +31,4 @@
       loop: "{{ extra_roles }}"
       loop_control:
         loop_var: "role"
+

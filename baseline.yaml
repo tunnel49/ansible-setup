@@ -1,8 +1,8 @@
 ---
-- name: "Run baseline tasks to prepare for further runs"
+
+- name: "ensure node meets basic requirements"
   hosts: all
   become: false
-  gather_facts: false
 
   tasks:
   - name: get ansible user data 
@@ -11,7 +11,6 @@
     become: false
     ansible.builtin.command: id -Gn
     register: user_meta
-  
   - name: check that the user can sudo
     become: false
     vars:
@@ -21,15 +20,13 @@
     ansible.builtin.set_fact: 
       ansible_sudo: >-
         {{ user_meta.stdout | split( ' ' ) | intersect( sudo_groups ) }}
-      cacheable: true
-
   - name: fail if ansible can't sudo
     become: false
     fail:
       msg: |
         Ansible probably can't sudo
-        if you are sure you want to try anyway, set force_sudo to true
-    when: not (ansible_sudo or (force_sudo | bool))
+        if you are sure you want to try anyway, set force_try_sudo to true
+    when: not (ansible_sudo or (force_try_sudo | bool))
 
   - name: update pacman packages
     become: true
@@ -37,10 +34,56 @@
       update_cache: true
       upgrade: true
 
-  - name: install packages required for ansible operation
+  - name: retrieve machine key
     become: true
-    community.general.pacman:
-      name:
-      - python
-      - python-pip
-      state: latest
+    vars:
+      keyid: 'root@{{ inventory_hostname }}'
+      gpghome: '/root/.gnupg'
+      gpg: 'gpg --homedir {{ gpghome }}'
+    ansible.builtin.shell:
+      cmd: | 
+        set -o pipefail &&
+        {{ gpg }} --with-colons -K {{ keyid }} | 
+        awk -F: '$1=="sec"&&$2~/^[u]$/{sec=1;next}sec=1&&$1=="fpr"{sec=0;print $10;exit}'
+    register: _result
+    changed_when: false
+    check_mode: false
+    failed_when: ( _result.rc != 0 ) or ( _result.stdout_lines | length != 1 )
+  - name: register key
+    set_fact:
+      cacheable: true
+      gpg_machine_key: '{{ _result.stdout }}'
+
+
+        # TODO: Check for trust
+        # awk -F: '$1=="pub"&&$2~/^[uf]$/{print $0;exit}'
+  - name: check if key is already trusted
+    delegate_to: 127.0.0.1
+    ansible.builtin.shell:
+      cmd: |
+        set -o pipefail &&
+        gpg --with-colons -k {{ gpg_machine_key }} |
+        awk -F: '$1=="pub"{print $0;exit}'
+    register: _result
+    failed_when: not _result.rc in [0,2]
+    changed_when: false
+    check_mode: false
+  - name: retrieve import and trust
+    when: not (_result.stdout_lines | length)
+    block:
+    - name: retrieve
+      become: true
+      changed_when: false
+      ansible.builtin.shell:
+        cmd: |
+          gpg --homedir /root/.gnupg -a --export {{ gpg_machine_key }}
+      register: _pub_result
+          # TODO: Add trust somehow...
+    - name: import
+      delegate_to: 127.0.0.1
+      ansible.builtin.shell:
+        cmd: |
+          gpg --import &&
+          gpg --import-ownertrust <<< "{{ gpg_machine_key }}:5:"
+        stdin: '{{ _pub_result.stdout }}'
+      register: _import_result

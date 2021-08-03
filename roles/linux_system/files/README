@@ -1,0 +1,10 @@
+# Files
+
+## skel
+
+skel needs to maintain empty directories so is kept in a tar file
+the tar file is also used during the play
+
+For convenience the skel folder is ignored in git.
+the tar file should be built using:
+  tar -cf skel.tar skel

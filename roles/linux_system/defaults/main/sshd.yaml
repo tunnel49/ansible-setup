@@ -9,4 +9,5 @@ sshd_config: |
   PrintMotd no
   X11Forwarding yes
   Subsystem	sftp /usr/lib/ssh/sftp-server
-
+  ClientAliveInterval 60
+  ClientAliveCountMax 5

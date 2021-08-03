@@ -1,0 +1,84 @@
+---
+
+- name: "Setup python"
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+  - name: setup python
+    raw: >-
+      [  -e {{ ansible_python }}
+      -a -e {{ ansible_python_pip }} ]
+    changed_when: false
+    failed_when: false
+    register: check_python
+
+  - name: install python
+    when: check_python.rc != 0
+    raw: pacman -Syu {{ ansible_python_package }} {{ ansible_python_pip_package }}
+
+  - name: check for environment 
+    raw: >-
+      [  -d {{ ansible_python_env_path }}
+      -a -x {{ ansible_python_env_wrapper }} ]
+    changed_when: false
+    failed_when: false
+    register: check_environment
+
+  - name: Create venv
+    when: check_environment.rc != 0
+    raw: >-
+      {{ ansible_python }} -m venv {{ ansible_python_env_path }}
+
+  - name: Create python venv wrapper
+    when: check_environment.rc != 0
+    raw: |
+      { cat > {{ ansible_python_env_wrapper }} <<-"EOF"
+      #!/usr/bin/env bash
+      source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/activate"
+      exec python $@
+      EOF
+      } && chmod 755 {{ ansible_python_env_path}}/pyvenv
+    args:
+      executable: /bin/bash
+
+  - name: update pacman packages
+    community.general.pacman:
+      update_cache: true
+      upgrade: true
+
+  - name: gather system information
+    ansible.builtin.setup:
+
+  - name: ensure a machine key exists 
+    vars:
+      keyid: 'root@{{ inventory_hostname }}'
+      gpghome: '/root/.gnupg'
+      gpg: 'gpg --homedir {{ gpghome }} --with-colons'
+    block:
+    - name: check if machine key already exists
+      shell:
+        cmd: |
+          set -o pipefail
+          {{ gpg }} -K {{ keyid }}  |
+          awk -F: '$1=="sec"&&$2=="u"{print $0;exit}'
+      register: _result
+      changed_when: false
+      failed_when: not _result.rc in [0, 2]
+    - name: generate new machine key
+      when: _result.rc == 2
+      shell: 
+        cmd: | 
+          {{ gpg }} --batch --gen-key /dev/stdin <<-EOF
+            %no-protection
+            Key-Type: eddsa
+            Key-Curve: Ed25519
+            Key-Usage: sign
+            Subkey-Type: ecdh
+            Subkey-Curve: Curve25519
+            Subkey-Usage: encrypt
+            Revoker: {{ master_key_revoker }}
+            Name-Email: {{ keyid }}
+            Expire-Date: 0
+            %commit
+          EOF

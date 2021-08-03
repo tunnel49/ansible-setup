@@ -1,0 +1,7 @@
+ansible_python: '/usr/bin/python'
+ansible_python_package: 'python'
+ansible_python_pip: '/usr/bin/pip'
+ansible_python_pip_package: 'python-pip'
+ansible_python_env_path: '/opt/tunnel49/ansible/env'
+ansible_python_env_wrapper: '{{ ansible_python_env_path }}/pyvenv'
+ansible_python_interpreter: '{{ ansible_python_env_wrapper }}'

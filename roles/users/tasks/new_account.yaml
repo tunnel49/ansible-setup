@@ -1,0 +1,47 @@
+---
+
+- name: generate passwords
+  loop:
+  - linux_pam
+  - gpg_key
+  delegate_to: 127.0.0.1
+  vars:
+    passpath: local/{{ inventory_hostname }}/{{ user }}/{{ item }}
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail &&
+      pass=$(pwgen -s1 24) &&
+      pass add -ef {{ passpath | quote }} &>/dev/null <<< ${pass} && 
+      gpg --trust-model direct --no-tty -ear {{ gpg_machine_key | quote }} <<< ${pass}
+  register: _generate_passwords
+
+- name: create new user entry
+  become: true
+  ansible.builtin.shell:
+    cmd: |
+      pass="$(gpg --homedir /root/.gnupg -dq)" &&
+      crypt="$(openssl passwd -1 ${pass})" &&
+      useradd -mu {{ idm_data[user].uid | quote }} -p "${crypt}" {{ user | quote }}
+    stdin: '{{ _generate_passwords.results[0].stdout }}'
+
+- name: create gpg key for user 
+  become: true
+  vars:
+    keyid: '{{ user }}@{{ inventory_hostname }}'
+  ansible.builtin.shell:
+    cmd: |
+      pass="$(gpg --no-tty --homedir /root/.gnupg -dq)" &&
+      sudo -u {{ user }} gpg --batch --gen-key <<-EOF
+      Key-Type: eddsa
+      Key-Curve: Ed25519
+      Key-Usage: sign
+      Subkey-Type: ecdh
+      Subkey-Curve: Curve25519
+      Subkey-Usage: encrypt
+      Revoker: {{ master_key_revoker }}
+      Passphrase: ${pass}
+      Name-Email: {{ keyid }}
+      Expire-Date: 0
+      %commit
+      EOF
+    stdin: '{{ _generate_passwords.results[1].stdout }}'
