@@ -2,3 +2,5 @@
 
 - name: reconfigure sshd
   ansible.builtin.include_tasks: 'sshd_reconfigure_handler.yaml'
+- name: reconfigure networking
+  ansible.builtin.include_tasks: 'network_reconfigure_handler.yaml'

@@ -1,0 +1,9 @@
+---
+
+networking_services:
+- iwd.service
+- systemd-networkd.service
+
+networking_packages:
+- iwd
+- systemd

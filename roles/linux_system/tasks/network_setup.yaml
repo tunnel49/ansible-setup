@@ -1,0 +1,48 @@
+---
+
+- name: install networking packages
+  become: true
+  community.general.pacman:
+    name: '{{ networking_packages }}'
+
+- name: install iwd config
+  become: true
+  ansible.builtin.template:
+    src: 'network/iwd/main.conf.j2'
+    dest: '/etc/iwd/main.conf'
+  notify: reconfigure networking
+
+- name: setup networkd to only wait for one interface
+  become: true
+  vars: 
+    file: 'wait-for-only-one-interface.conf'
+    path: '/etc/systemd/system/systemd-networkd-wait-online.service.d'
+  block:
+  - name: setup wait-online.service.d directory
+    ansible.builtin.file:
+      path: '{{ path }}'
+      state: 'directory'
+  - name: setup wait-online.service.d to wait for single interface
+    ansible.builtin.template:
+      src: 'network/networkd/{{ file }}.j2'
+      dest: '{{ path }}/{{ file }}'
+
+- name: install networks
+  become: true
+  ansible.builtin.template:
+    src: 'network/networkd/network.j2'
+    dest: '/etc/systemd/network/25-{{ network.device }}.network'
+  loop: '{{ networks }}'
+  loop_control:
+    loop_var: network
+  notify: reconfigure networking
+
+- meta: flush_handlers
+
+- name: enable networking services
+  become: true
+  ansible.builtin.systemd:
+    name: '{{ item }}'
+    state: started
+    enabled: true
+  loop: '{{ networking_services }}'

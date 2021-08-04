@@ -10,7 +10,7 @@
   ansible.builtin.shell:
     cmd: |
       set -o pipefail &&
-      pass=$(pwgen -s1 24) &&
+      pass=$(pwgen -1 24) &&
       pass add -ef {{ passpath | quote }} &>/dev/null <<< ${pass} && 
       gpg --trust-model direct --no-tty -ear {{ gpg_machine_key | quote }} <<< ${pass}
   register: _generate_passwords
@@ -20,7 +20,7 @@
   ansible.builtin.shell:
     cmd: |
       pass="$(gpg --homedir /root/.gnupg -dq)" &&
-      crypt="$(openssl passwd -1 ${pass})" &&
+      crypt="$(openssl passwd -6 ${pass})" &&
       useradd -mu {{ idm_data[user].uid | quote }} -p "${crypt}" {{ user | quote }}
     stdin: '{{ _generate_passwords.results[0].stdout }}'
 

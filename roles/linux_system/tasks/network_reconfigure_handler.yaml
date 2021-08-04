@@ -1,0 +1,8 @@
+---
+
+- name: restart networking services
+  become: true
+  ansible.builtin.systemd:
+    name: {{ item }}
+    state: restarted
+  loop: '{{ networking_services }}'

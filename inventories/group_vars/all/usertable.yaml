@@ -9,6 +9,10 @@ wheel_groups:
 - optical
 - audio
 
+users: # Override this in inventory to install a subset of users
+- tunnel49
+- billogram
+
 idm_data:
   tunnel49:
     uid:  10000

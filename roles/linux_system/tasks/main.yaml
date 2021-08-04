@@ -4,7 +4,17 @@
   community.general.pacman: 
     name: 
     - rsync
+    - pam-u2f
     state: latest
+
+- name: setup networking
+  import_tasks: network_setup.yaml
+
+- name: setup system-auth for yubikey
+  become: true
+  ansible.builtin.template:
+    src: pam.d/system-auth.j2
+    dest: /etc/pam.d/system-auth
 
 - name: copy skeleton
   become: true
@@ -13,7 +23,9 @@
     dest: /etc/
     owner: 0
     group: 0
-    
+
+    # TODO: When we have passwordless sudo we can revert to
+    #
     # - name: copy skeleton
     #   become: true
     #   ansible.posix.synchronize:
@@ -22,8 +34,8 @@
     #     delete: true
     #     checksum: true
     #     rsync_opts:
-      #     - "--no-motd"
-      #     - "--exclude=.gitkeep"
+    #     - "--no-motd"
+    #     - "--exclude=.gitkeep"
 
 - name: create wheel folder
   become: true
